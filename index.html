@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mừng Sinh Nhật Ly Na 💖</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #score {
+            color: #ff0a54;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        #guide {
+            color: #333;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            align-self: flex-start;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-right-btns {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            pointer-events: auto;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .btn-ui {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #ff477e;
+            color: #ff477e;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: 0.2s;
+        }
+
+        .btn-ui:active {
+            background: #ff477e;
+            color: white;
+        }
+
+        .dynamic-text {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: top 2s ease-out, opacity 1s;
+            z-index: 15;
+            text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000;
+            pointer-events: none;
+        }
+
+        #bubble-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 12;
+        }
+
+        .chat-bubble {
+            position: absolute;
+            background: white;
+            border: 3px solid #ff477e;
+            border-radius: 12px;
+            padding: 10px 35px 10px 15px;
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 250px;
+            pointer-events: auto;
+            text-align: center;
+            transform: translate(-50%, -100%);
+        }
+
+        .chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+
+        .chat-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 13px 13px 0;
+            border-style: solid;
+            border-color: #ff477e transparent transparent transparent;
+            z-index: -1;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff477e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            pointer-events: auto;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #ff0a54;
+            transform: scale(1.1);
+        }
+
+        #blocker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background-color: #ff0a54;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 15;
+            display: none;
+        }
+
+        #mobile-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            z-index: 100;
+            display: none;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+
+        .joystick-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .joystick-group .row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .btn-action {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 3px solid #ff477e;
+            color: #ff477e;
+            font-size: 24px;
+            font-weight: bold;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-action:active {
+            background: rgba(255, 71, 126, 0.4);
+        }
+
+        #btn-jump {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 18px;
+            pointer-events: auto;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <audio id="bgm" loop src="nhac1.mp3"></audio>
+
+    <div id="blocker">
+        <b>Click để bắt đầu (Phiên bản PC)</b>
+        <p style="font-size: 16px;">V: Đổi POV | M: Tắt Nhạc | N: Đổi Nhạc | SPACE x3: Bay</p>
+    </div>
+    <div id="crosshair"></div>
+    <div id="ui-layer">
+        <div id="score">💖 Điểm Yêu Thương: 0</div>
+        <div id="guide" class="guide-text"></div>
+        <div class="top-right-btns">
+            <button id="btn-music" class="btn-ui">🎵 Bật Nhạc (M)</button>
+            <button id="btn-next-music" class="btn-ui">⏭️ Đổi Nhạc (N)</button>
+            <button id="btn-pov" class="btn-ui">👁️ Đổi POV (V)</button>
+        </div>
+    </div>
+
+    <div id="mobile-controls">
+        <button id="btn-jump" class="btn-action">Nhảy/Bay</button>
+        <div class="joystick-group">
+            <button id="btn-w" class="btn-action">W</button>
+            <div class="row">
+                <button id="btn-a" class="btn-action">A</button>
+                <button id="btn-s" class="btn-action">S</button>
+                <button id="btn-d" class="btn-action">D</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wish-container" class="dynamic-text"></div>
+    <div id="bubble-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth < 768);
+
+        // --- HỆ THỐNG ÂM THANH (SFX SYNTH DỊU NHẸ HƠN) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const sfxCtx = new AudioContext();
+
+        function playSFX(type) {
+            if (sfxCtx.state === 'suspended') sfxCtx.resume();
+            const now = sfxCtx.currentTime;
+
+            if (type === 'explode') {
+                // Tiếng nổ "Bụp" trầm, rớt pitch siêu nhanh, êm tai không chói
+                const osc = sfxCtx.createOscillator();
+                const gainOsc = sfxCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+                gainOsc.gain.setValueAtTime(0.5, now);
+                gainOsc.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gainOsc);
+                gainOsc.connect(sfxCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+            else if (type === 'launch') {
+                const osc = sfxCtx.createOscillator(); const gain = sfxCtx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 1.0);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                osc.connect(gain); gain.connect(sfxCtx.destination); osc.start(now); osc.stop(now + 1.0);
+            }
+            else {
+                const osc = sfxCtx.createOscillator(); const gain = sfxCtx.createGain();
+                osc.connect(gain); gain.connect(sfxCtx.destination);
+                if (type === 'jump') { osc.type = 'sine'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(600, now + 0.1); gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); }
+                else if (type === 'fly') { osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3); gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); }
+                else if (type === 'balloon') { osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(200, now + 0.2); gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); }
+                else if (type === 'npc') { osc.type = 'square'; osc.frequency.setValueAtTime(600, now); osc.frequency.setValueAtTime(800, now + 0.05); gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); }
+                else if (type === 'cake') { osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3); gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); }
+            }
+        }
+
+        // --- NHẠC NỀN & CHUYỂN BÀI ---
+        const music = document.getElementById('bgm');
+        const btnMusic = document.getElementById('btn-music');
+        const btnNextMusic = document.getElementById('btn-next-music');
+        let isMusicPlaying = false; let currentTrack = 1;
+
+        const toggleMusic = () => {
+            if (isMusicPlaying) { music.pause(); btnMusic.innerText = "🎵 Bật Nhạc (M)"; }
+            else { music.play().catch(() => alert(`Chưa tải file nhac${currentTrack}.mp3!`)); btnMusic.innerText = "🔇 Tắt Nhạc (M)"; }
+            isMusicPlaying = !isMusicPlaying;
+        };
+        const nextMusic = () => {
+            currentTrack = currentTrack === 1 ? 2 : 1;
+            music.src = `nhac${currentTrack}.mp3`;
+            if (isMusicPlaying) music.play().catch(() => alert(`Không tìm thấy file nhac${currentTrack}.mp3!`));
+        };
+        btnMusic.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); toggleMusic(); });
+        btnNextMusic.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); nextMusic(); });
+
+        window.activeBubbles = {};
+        window.closeBubble = (btn) => { if (btn && btn.parentElement) btn.parentElement.remove(); };
+
+        // --- 1. SETUP 3D CƠ BẢN ---
+        const scene = new THREE.Scene(); scene.background = new THREE.Color(0xffe4e1); scene.fog = new THREE.FogExp2(0xffe4e1, 0.03);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 1.8, -5);
+        const camera3rd = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); camera.add(camera3rd); camera3rd.position.set(0, 1.5, 4); scene.add(camera);
+        const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; document.body.appendChild(renderer.domElement);
+        const interactables = [];
+        const rockets = []; const fireworks = [];
+
+        // --- 2. NHÂN VẬT CHÍNH ---
+        const playerModel = new THREE.Group();
+        const pSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: 0xadd8e6, roughness: 0.9 })); pSkirt.position.y = 0.4; pSkirt.castShadow = true; playerModel.add(pSkirt);
+        const pShirt = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 0.8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 })); pShirt.position.y = 1.15; pShirt.castShadow = true; playerModel.add(pShirt);
+        const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16), new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.5 })); pHead.position.y = 1.9; pHead.castShadow = true; playerModel.add(pHead);
+        const pMatHair = new THREE.MeshStandardMaterial({ color: 0x3b2818, roughness: 1.0 });
+        const pHairBack = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.3, 0.4), pMatHair); pHairBack.position.set(0, 1.5, -0.25); playerModel.add(pHairBack);
+        const pHairTop = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.2, 0.4), pMatHair); pHairTop.position.set(0, 2.25, 0.1); playerModel.add(pHairTop);
+        const pMatG = new THREE.MeshStandardMaterial({ color: 0x222222, transparent: true, opacity: 0.8 });
+        const pg1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.03), pMatG); pg1.position.set(-0.16, 1.95, 0.38); const pg2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.03), pMatG); pg2.position.set(0.16, 1.95, 0.38); const pbridge = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.03), pMatG); pbridge.position.set(0, 1.95, 0.38); playerModel.add(pg1, pg2, pbridge);
+        scene.add(playerModel); playerModel.visible = false;
+
+        let isThirdPerson = false;
+        const togglePOV = () => { isThirdPerson = !isThirdPerson; playerModel.visible = isThirdPerson; document.getElementById('crosshair').style.display = (isThirdPerson || isTouchDevice || !pcControls.isLocked) ? 'none' : 'block'; };
+        document.getElementById('btn-pov').addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); togglePOV(); });
+
+        // --- 3. DECOR, ÁNH SÁNG ---
+        scene.add(new THREE.HemisphereLight(0xffffff, 0xffb6c1, 0.6));
+        const dirLight = new THREE.DirectionalLight(0xffddaa, 1.2); dirLight.position.set(5, 10, -5); dirLight.castShadow = true; scene.add(dirLight);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: 0xffe4e1, roughness: 0.8 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+        function createGift(x, z, boxCol, ribCol, scale, rotY) {
+            const g = new THREE.Group();
+            const bMat = new THREE.MeshStandardMaterial({ color: boxCol, roughness: 0.8 });
+            const rMat = new THREE.MeshStandardMaterial({ color: ribCol, roughness: 0.5 });
+            const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), bMat); b.castShadow = true; b.receiveShadow = true;
+            const r1 = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.05, 0.2), rMat); const r2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.05, 1.05), rMat);
+            const bow = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), rMat); bow.position.y = 0.55;
+            g.add(b, r1, r2, bow); g.scale.set(scale, scale, scale); g.position.set(x, 0.5 * scale, z); g.rotation.y = rotY; scene.add(g);
+        }
+        createGift(-12, 12, 0xff477e, 0xffffff, 1.5, 0.3); createGift(-10, 12.5, 0x1e90ff, 0xffd700, 1.2, -0.2); createGift(-11, 10, 0x32cd32, 0xffffff, 1.0, 0.5); createGift(12, 12, 0xffd700, 0xff0000, 1.6, -0.4); createGift(10, 12.2, 0x8a2be2, 0xffffff, 1.3, 0.1); createGift(12.5, 10, 0xff69b4, 0x000000, 1.1, -0.6);
+        createGift(-12, -5, 0xffa500, 0xffffff, 1.4, 0.8); createGift(-13, -7, 0x00ced1, 0xff477e, 1.2, -0.3); createGift(12, -5, 0xff1493, 0x7fff00, 1.5, -0.5); createGift(11, -3, 0x4682b4, 0xffffff, 1.1, 0.2); createGift(-3.5, 7.5, 0xffffff, 0xff0000, 1.2, 0.4); createGift(3.5, 7.5, 0xffff00, 0x0000ff, 1.0, -0.2);
+
+        const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 256; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ff477e'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = 'white'; ctx.lineWidth = 10; ctx.strokeRect(5, 5, 1014, 246); ctx.font = 'Bold 60px Arial'; ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.fillText('CHÚC MỪNG LY NA 19 TUỔI', 512, 140);
+        const bannerGroup = new THREE.Group();
+        const banner = new THREE.Mesh(new THREE.PlaneGeometry(12, 3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) })); bannerGroup.add(banner);
+        const fairyLights = []; const ledColors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff, 0xffffff]; const ledGeo = new THREE.SphereGeometry(0.12, 8, 8);
+        const addLed = (x, y) => { const mat = new THREE.MeshBasicMaterial({ color: ledColors[Math.floor(Math.random() * ledColors.length)], transparent: true }); const led = new THREE.Mesh(ledGeo, mat); led.position.set(x, y, 0.1); bannerGroup.add(led); fairyLights.push({ mesh: led, offset: Math.random() * Math.PI * 2 }); };
+        for (let i = -5.8; i <= 5.8; i += 0.5) { addLed(i, 1.6); addLed(i, -1.6); } for (let j = -1.2; j <= 1.2; j += 0.5) { addLed(-6.1, j); addLed(6.1, j); }
+        const stringMat = new THREE.MeshBasicMaterial({ color: 0x333333 }); const stringL = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2), stringMat); stringL.position.set(-5, 2.5, 0); bannerGroup.add(stringL); const stringR = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2), stringMat); stringR.position.set(5, 2.5, 0); bannerGroup.add(stringR);
+        bannerGroup.position.set(0, 4.5, 14.8); bannerGroup.rotation.y = Math.PI; scene.add(bannerGroup);
+
+        const balloons = []; const bColors = [0xff477e, 0xffb3c6, 0xffc0cb, 0x87cefa, 0xffd700];
+        for (let i = 0; i < 20; i++) {
+            const bGroup = new THREE.Group(); const bMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshStandardMaterial({ color: bColors[i % bColors.length], roughness: 0.2 })); bMesh.castShadow = true; bMesh.userData = { type: 'balloon', index: i }; interactables.push(bMesh);
+            const bString = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 1.5), new THREE.MeshBasicMaterial({ color: 0xffffff })); bString.position.y = -0.9; bGroup.add(bMesh, bString); bGroup.position.set((Math.random() - 0.5) * 16, Math.random() * 2 + 2.5, (Math.random() - 0.5) * 16);
+            scene.add(bGroup); balloons.push({ group: bGroup, baseY: bGroup.position.y, offset: Math.random() * 10, velY: 0 });
+        }
+
+        const table = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.5, 3.5), new THREE.MeshStandardMaterial({ color: 0xd2b48c, roughness: 1.0 })); table.position.set(0, 0.75, 5); table.receiveShadow = true; table.castShadow = true; scene.add(table);
+        const cakeBase = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.5, 32), new THREE.MeshStandardMaterial({ color: 0xff69b4, roughness: 0.6 })); cakeBase.position.set(0, 1.5 + 0.25, 5); cakeBase.castShadow = true; cakeBase.userData = { type: 'cake' }; scene.add(cakeBase);
+        const cakeTop = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.4, 32), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 })); cakeTop.position.set(0, 1.5 + 0.5 + 0.2, 5); cakeTop.castShadow = true; cakeTop.userData = { type: 'cake' }; scene.add(cakeTop);
+        const flame = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffaa00 })); flame.position.set(0, 2.6, 5); flame.visible = false; scene.add(flame);
+        const candleLight = new THREE.PointLight(0xffaa00, 0, 4); candleLight.position.set(0, 2.7, 5); scene.add(candleLight);
+        interactables.push(cakeBase, cakeTop);
+
+        // --- 4. NPC SALON TÓC ---
+        const npcsData = [];
+        const npcDialogues = {
+            "Ben Xù": ["Anh yêu babiii", "Ngơ iu cố lên rùi về với anhhhh", "Moaahhh, ôm babiii"], "Dâu Tây": ["Chị hai đao", "Chị hai cho Dâu Tây xin 2 chục mua tài lộc"], "Ba": ["Con gái vững vàng nhé", "Ba thương con"], "Mẹ": ["Bữa ni nhìn con lên kí hì <3", "Mẹ thương con lắm"],
+            "Ông Ngoại": ["Có gì nhớ gọi ngoại nghe con", "Nhớ ăn uống đầy đủ nghe con", "Con giữ sức khỏe nghe"], "Bà Ngoại": ["Có gì nhớ gọi ngoại nghe con", "Nhớ ăn uống đầy đủ nghe con", "Con giữ sức khỏe nghe"], "Ông Nội": ["Con học tốt, rồi về thăm nội nghe"]
+        };
+
+        function createNPC(name, x, z, shirtHex, pantsHex, hasGlasses, hairStyle, hairColorHex) {
+            const group = new THREE.Group(); const npcIndex = npcsData.length;
+            const pants = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: pantsHex, roughness: 0.9 })); pants.position.y = 0.4; pants.castShadow = true; pants.userData = { type: 'npc', name: name, index: npcIndex }; group.add(pants);
+            const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 0.8), new THREE.MeshStandardMaterial({ color: shirtHex, roughness: 0.9 })); shirt.position.y = 1.15; shirt.castShadow = true; shirt.userData = { type: 'npc', name: name, index: npcIndex }; group.add(shirt);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16), new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.5 })); head.position.y = 1.9; head.castShadow = true; head.userData = { type: 'npc', name: name, index: npcIndex }; group.add(head);
+            interactables.push(pants, shirt, head);
+
+            const hairMat = new THREE.MeshStandardMaterial({ color: hairColorHex, roughness: 0.9 });
+            if (hairStyle === 'short' || hairStyle === 'bun' || hairStyle === 'shoulder') {
+                const hBase = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.2, 0.85), hairMat); hBase.position.y = 2.2; group.add(hBase);
+                const hBack = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.4, 0.2), hairMat); hBack.position.set(0, 2.0, -0.35); group.add(hBack);
+                if (hairStyle === 'bun') { const hBun = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), hairMat); hBun.position.set(0, 2.35, -0.25); group.add(hBun); }
+                if (hairStyle === 'shoulder') { const hSideL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.5), hairMat); hSideL.position.set(-0.35, 1.8, -0.1); const hSideR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.5), hairMat); hSideR.position.set(0.35, 1.8, -0.1); group.add(hSideL, hSideR); }
+            } else if (hairStyle === 'curly') {
+                for (let i = 0; i < 25; i++) { const curl = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), hairMat); curl.position.set((Math.random() - 0.5) * 0.8, 2.15 + Math.random() * 0.25, (Math.random() - 0.5) * 0.8); group.add(curl); }
+            }
+            if (hasGlasses) {
+                const gMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 }); const g1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.05), gMat); g1.position.set(-0.16, 1.95, 0.38); const g2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.05), gMat); g2.position.set(0.16, 1.95, 0.38); const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.05), gMat); bridge.position.set(0, 1.95, 0.38); group.add(g1, g2, bridge);
+            }
+            const c = document.createElement('canvas'); c.width = 256; c.height = 128; const ctx2 = c.getContext('2d'); ctx2.font = "Bold 40px Arial"; ctx2.textAlign = "center"; ctx2.strokeStyle = "rgba(0,0,0,0.8)"; ctx2.lineWidth = 6; ctx2.strokeText(name, 128, 64); ctx2.fillStyle = "white"; ctx2.fillText(name, 128, 64);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false })); sprite.scale.set(2, 1, 1); sprite.position.set(0, 2.7, 0); group.add(sprite);
+            group.position.set(x, 0, z); group.lookAt(0, 0, 5); scene.add(group); npcsData.push({ group: group, swayTimer: 0 });
+        }
+
+        createNPC("Ba", -2.5, 3.0, 0x4682b4, 0x333333, false, 'short', 0x1a1110);
+        createNPC("Mẹ", -1.5, 1.5, 0xdb7093, 0xffffff, false, 'bun', 0x1a1110);
+        createNPC("Ông Ngoại", -4.0, 4.0, 0x888888, 0x222222, false, 'short', 0xcccccc);
+        createNPC("Bà Ngoại", -5.0, 5.0, 0x8b4513, 0x111111, false, 'bun', 0x111111);
+        createNPC("Ông Nội", 4.0, 4.0, 0x555555, 0x000000, false, 'short', 0xcccccc);
+        createNPC("Dâu Tây", 1.5, 1.5, 0xff4500, 0x1e90ff, true, 'shoulder', 0x1a1110);
+        createNPC("Ben Xù", 2.5, 3.0, 0xffd700, 0x2e8b57, true, 'curly', 0x1a1110);
+
+        function spawnChatBubble(npcIndex, text) {
+            if (window.activeBubbles[npcIndex]) window.activeBubbles[npcIndex].element.remove();
+            const bubble = document.createElement('div'); bubble.className = 'chat-bubble';
+            bubble.innerHTML = `${text}<button class="close-btn" onclick="window.closeBubble(this)">✖</button>`;
+            document.getElementById('bubble-container').appendChild(bubble);
+            window.activeBubbles[npcIndex] = { element: bubble, timer: 30.0, npcGroup: npcsData[npcIndex].group };
+        }
+
+        // --- 5. HỆ THỐNG PHÁO HOA TRÁI TIM 1 MÀU ---
+        function launchFireworksSystem() {
+            playSFX('launch');
+            // Bắn 8 quả pháo xung quanh map bao gồm cả phía sau lưng
+            for (let i = 0; i < 8; i++) {
+                const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+                const startX = (Math.random() - 0.5) * 28; const startZ = (Math.random() - 0.5) * 28;
+                mesh.position.set(startX, 0.5, startZ); scene.add(mesh);
+
+                const vx = -startX * (0.1 + Math.random() * 0.1);
+                const vz = (5 - startZ) * (0.1 + Math.random() * 0.1);
+                const vy = 16 + Math.random() * 6;
+                rockets.push({ mesh, vel: new THREE.Vector3(vx, vy, vz), age: 0 });
+            }
+        }
+
+        function explodeFirework(position) {
+            playSFX('explode');
+            const count = 400; const geo = new THREE.BufferGeometry(); const pos = new Float32Array(count * 3); const vel = []; const colors = new Float32Array(count * 3);
+
+            const facingAngle = Math.atan2(position.x, position.z);
+
+            // CHỌN 1 MÀU DUY NHẤT CHO TOÀN BỘ TRÁI TIM NÀY
+            const heartColor = new THREE.Color().setHSL(Math.random(), 1.0, 0.6);
+
+            for (let i = 0; i < count; i++) {
+                pos[i * 3] = position.x; pos[i * 3 + 1] = position.y; pos[i * 3 + 2] = position.z;
+
+                const t = Math.random() * Math.PI * 2;
+                const scale = 0.6 + Math.random() * 0.2;
+
+                const hx = 16 * Math.pow(Math.sin(t), 3) * scale;
+                const hy = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * scale;
+                const hz = (Math.random() - 0.5) * 2.5;
+
+                const vx = hx * Math.cos(facingAngle) + hz * Math.sin(facingAngle);
+                const vz = -hx * Math.sin(facingAngle) + hz * Math.cos(facingAngle);
+
+                vel.push({ x: vx, y: hy, z: vz });
+
+                // Gán đúng 1 màu duy nhất cho mọi hạt trong quả pháo này
+                colors[i * 3] = heartColor.r; colors[i * 3 + 1] = heartColor.g; colors[i * 3 + 2] = heartColor.b;
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            // XÓA AdditiveBlending ĐỂ MÀU CẦU VỒNG KHÔNG BỊ TRẮNG BÓC
+            const mat = new THREE.PointsMaterial({ size: 0.45, vertexColors: true, transparent: true, opacity: 1, depthWrite: false });
+            const points = new THREE.Points(geo, mat); scene.add(points);
+            fireworks.push({ mesh: points, velocities: vel, age: 0 });
+        }
+
+        // --- 6. ĐIỀU KHIỂN & CHẾ ĐỘ BAY ---
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, moveUp = false, moveDown = false;
+        let jumpCount = 0; let velocityY = 0; let pcControls; let isFlying = false;
+
+        let jumpPressCount = 0; let lastJumpTime = 0;
+        const triggerJump = () => {
+            const now = Date.now(); if (now - lastJumpTime > 500) jumpPressCount = 0;
+            jumpPressCount++; lastJumpTime = now;
+            if (jumpPressCount === 3) { isFlying = !isFlying; jumpPressCount = 0; velocityY = 0; playSFX('fly'); return; }
+            if (!isFlying && jumpCount < 2) { velocityY = (jumpCount === 0) ? 8.0 : 10.0; jumpCount++; playSFX('jump'); }
+        };
+
+        if (isTouchDevice) {
+            document.getElementById('blocker').style.display = 'none'; document.getElementById('mobile-controls').style.display = 'flex';
+            document.getElementById('guide').innerHTML = "Vuốt xoay | WASD đi | Space x3 ĐỂ BAY!<br>➡️ CHẠM ĐỂ TƯƠNG TÁC (+1 ĐIỂM)";
+            camera.lookAt(0, 1.8, 5); let isDragging = false, prevTouch = null; const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            document.addEventListener('touchstart', e => { if (e.target.closest('button') || e.target.closest('.chat-bubble')) return; isDragging = true; prevTouch = e.touches[0]; }, { passive: false });
+            document.addEventListener('touchmove', e => { if (!isDragging) return; euler.setFromQuaternion(camera.quaternion); euler.y -= (e.touches[0].pageX - prevTouch.pageX) * 0.005; euler.x -= (e.touches[0].pageY - prevTouch.pageY) * 0.005; euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.x)); camera.quaternion.setFromEuler(euler); prevTouch = e.touches[0]; }, { passive: false });
+            document.addEventListener('touchend', () => isDragging = false);
+            const bindBtn = (id, setVar) => { const btn = document.getElementById(id); btn.addEventListener('touchstart', e => { e.preventDefault(); setVar(true); }, { passive: false }); btn.addEventListener('touchend', e => { e.preventDefault(); setVar(false); }, { passive: false }); };
+            bindBtn('btn-w', v => moveForward = v); bindBtn('btn-s', v => moveBackward = v); bindBtn('btn-a', v => moveLeft = v); bindBtn('btn-d', v => moveRight = v);
+            document.getElementById('btn-jump').addEventListener('touchstart', e => { e.preventDefault(); triggerJump(); });
+        } else {
+            document.getElementById('guide').innerHTML = "WASD: Đi | M: Bật Nhạc | N: Đổi Nhạc | SPACE x3: Bay<br>➡️ CLICK ĐỂ TƯƠNG TÁC (+1 ĐIỂM)";
+            pcControls = new PointerLockControls(camera, document.body);
+            document.getElementById('blocker').addEventListener('click', () => pcControls.lock());
+            pcControls.addEventListener('lock', () => { document.getElementById('blocker').style.display = 'none'; if (!isThirdPerson) document.getElementById('crosshair').style.display = 'block'; });
+            pcControls.addEventListener('unlock', () => { document.getElementById('blocker').style.display = 'flex'; document.getElementById('crosshair').style.display = 'none'; resetKeys(); });
+
+            const handleKey = (e, val) => {
+                const c = e.code;
+                if (c === 'KeyW') moveForward = val; if (c === 'KeyS') moveBackward = val; if (c === 'KeyA') moveLeft = val; if (c === 'KeyD') moveRight = val;
+                if (c === 'ShiftLeft' || c === 'ShiftRight') moveDown = val;
+                if (c === 'Space') { if (val && e.type === 'keydown' && !e.repeat) triggerJump(); moveUp = val; }
+                if (c === 'KeyV' && val && !e.repeat) togglePOV(); if (c === 'KeyM' && val && !e.repeat) toggleMusic(); if (c === 'KeyN' && val && !e.repeat) nextMusic();
+            };
+            document.addEventListener('keydown', e => handleKey(e, true)); document.addEventListener('keyup', e => handleKey(e, false));
+        }
+
+        const resetKeys = () => { moveForward = moveBackward = moveLeft = moveRight = moveUp = moveDown = false; };
+        window.addEventListener('blur', resetKeys); document.addEventListener('visibilitychange', () => { if (document.hidden) resetKeys(); }); document.addEventListener('mouseleave', resetKeys);
+
+        // --- 7. RAYCASTER (CỘNG ĐIỂM TOÀN NĂNG) ---
+        const raycaster = new THREE.Raycaster();
+        let loveScore = 0; const wishContainer = document.getElementById('wish-container');
+        const cakeWishes = ["Chúc Ly Na 19 tuổi xinh đẹp!", "Cả nhà thương em bé!", "Tuổi mới thật bùng nổ nha!"];
+
+        const fireLove = (clientX, clientY) => {
+            if (!isTouchDevice && pcControls && pcControls.isLocked) { const centerEl = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2); if (centerEl && centerEl.classList.contains('close-btn')) { centerEl.click(); return; } }
+            if (!isTouchDevice && pcControls && !pcControls.isLocked) return;
+
+            const pointer = new THREE.Vector2();
+            if (isTouchDevice || isThirdPerson) { pointer.x = (clientX / window.innerWidth) * 2 - 1; pointer.y = -(clientY / window.innerHeight) * 2 + 1; } else { pointer.set(0, 0); }
+            const activeCam = isThirdPerson ? camera3rd : camera; raycaster.setFromCamera(pointer, activeCam);
+            const intersects = raycaster.intersectObjects(interactables);
+
+            if (intersects.length > 0) {
+                loveScore++;
+                document.getElementById('score').innerText = `💖 Điểm Yêu Thương: ${loveScore}`;
+                if (loveScore % 10 === 0 && loveScore > 0) launchFireworksSystem();
+
+                const hitData = intersects[0].object.userData;
+                if (hitData.type === 'cake') {
+                    playSFX('cake'); flame.visible = true; candleLight.intensity = 2;
+                    wishContainer.innerText = cakeWishes[Math.floor(Math.random() * cakeWishes.length)]; wishContainer.style.color = '#ff477e'; wishContainer.style.transition = 'none'; wishContainer.style.opacity = '1'; wishContainer.style.top = '45%'; void wishContainer.offsetWidth; wishContainer.style.transition = 'top 2s ease-out, opacity 1s 1s'; wishContainer.style.top = '30%'; wishContainer.style.opacity = '0';
+                }
+                else if (hitData.type === 'balloon') { playSFX('balloon'); balloons[hitData.index].velY = 8.0; }
+                else if (hitData.type === 'npc') {
+                    playSFX('npc');
+                    const lines = npcDialogues[hitData.name]; npcsData[hitData.index].swayTimer = 1.5;
+                    spawnChatBubble(hitData.index, lines[Math.floor(Math.random() * lines.length)]);
+                }
+            }
+        };
+
+        if (isTouchDevice) {
+            let startT = { x: 0, y: 0 };
+            document.addEventListener('touchstart', e => { if (!e.target.closest('button') && !e.target.closest('.chat-bubble')) { startT.x = e.touches[0].clientX; startT.y = e.touches[0].clientY; } }, { passive: false });
+            document.addEventListener('touchend', e => { if (!e.target.closest('button') && !e.target.closest('.chat-bubble')) { const t = e.changedTouches[0]; if (Math.hypot(t.clientX - startT.x, t.clientY - startT.y) < 10) fireLove(t.clientX, t.clientY); } });
+        } else { document.addEventListener('mousedown', (e) => { if (!e.target.closest('button') && !e.target.closest('.chat-bubble')) fireLove(e.clientX, e.clientY); }); }
+
+        // --- 8. VÒNG LẶP VẬT LÝ ---
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = Math.min(clock.getDelta(), 0.1); const time = clock.getElapsedTime();
+
+            fairyLights.forEach(fl => { fl.mesh.material.opacity = 0.5 + Math.sin(time * 5 + fl.offset) * 0.5; });
+
+            const speed = 7.0 * delta;
+            if (moveForward || moveBackward || moveLeft || moveRight) {
+                let dir = new THREE.Vector3(), right = new THREE.Vector3();
+                if (!isTouchDevice && pcControls && pcControls.isLocked) pcControls.getDirection(dir); else camera.getWorldDirection(dir);
+                dir.y = 0; dir.normalize(); right.set(-dir.z, 0, dir.x);
+                if (moveForward) camera.position.addScaledVector(dir, speed); if (moveBackward) camera.position.addScaledVector(dir, -speed);
+                if (moveLeft) camera.position.addScaledVector(right, -speed); if (moveRight) camera.position.addScaledVector(right, speed);
+            }
+
+            let groundY = 1.8; const dx = camera.position.x - 0, dz = camera.position.z - 5;
+            if (Math.abs(dx) <= 1.75 && Math.abs(dz) <= 1.75) {
+                groundY = 1.8 + 1.5; const distSq = dx * dx + dz * dz;
+                if (distSq <= 1.44) groundY = 1.8 + 2.0; if (distSq <= 0.64) groundY = 1.8 + 2.4;
+            }
+
+            if (isFlying) {
+                if (moveUp) camera.position.y += 6.0 * delta; if (moveDown) camera.position.y -= 6.0 * delta;
+                if (camera.position.y < groundY) camera.position.y = groundY;
+            } else {
+                if (camera.position.y < groundY && velocityY <= 0) { camera.position.y = groundY; velocityY = 0; jumpCount = 0; }
+                velocityY -= 25.0 * delta; camera.position.y += velocityY * delta;
+                if (camera.position.y <= groundY) { camera.position.y = groundY; velocityY = 0; jumpCount = 0; }
+            }
+
+            camera.position.x = Math.max(-14, Math.min(14, camera.position.x)); camera.position.z = Math.max(-14, Math.min(14, camera.position.z));
+            playerModel.position.set(camera.position.x, camera.position.y - 1.8, camera.position.z);
+            const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ'); playerModel.rotation.y = euler.y;
+
+            // Vật lý Rockets bay lên
+            for (let i = rockets.length - 1; i >= 0; i--) {
+                const r = rockets[i]; r.vel.y -= 12.0 * delta; r.mesh.position.addScaledVector(r.vel, delta); r.age += delta;
+                if (r.vel.y <= 0 || r.age > 2.5) { scene.remove(r.mesh); r.mesh.geometry.dispose(); r.mesh.material.dispose(); explodeFirework(r.mesh.position); rockets.splice(i, 1); }
+            }
+
+            // Vật lý Pháo hoa Trái Tim 1 MÀU & Rơi êm
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const fw = fireworks[i]; fw.age += delta;
+                // Kéo dài tuổi thọ lên 5 giây
+                if (fw.age > 5.0) { scene.remove(fw.mesh); fw.mesh.geometry.dispose(); fw.mesh.material.dispose(); fireworks.splice(i, 1); continue; }
+                const positions = fw.mesh.geometry.attributes.position.array;
+                for (let j = 0; j < positions.length / 3; j++) {
+                    fw.velocities[j].x -= fw.velocities[j].x * 3.5 * delta;
+                    fw.velocities[j].y -= fw.velocities[j].y * 3.5 * delta;
+                    fw.velocities[j].z -= fw.velocities[j].z * 3.5 * delta;
+                    fw.velocities[j].y -= 0.5 * delta;
+                    positions[j * 3] += fw.velocities[j].x * delta; positions[j * 3 + 1] += fw.velocities[j].y * delta; positions[j * 3 + 2] += fw.velocities[j].z * delta;
+                }
+                fw.mesh.geometry.attributes.position.needsUpdate = true; fw.mesh.material.opacity = Math.max(0, 1.0 - (fw.age / 5.0));
+            }
+
+            balloons.forEach(b => {
+                b.velY -= 15.0 * delta; b.group.position.y += b.velY * delta;
+                const targetY = b.baseY + Math.sin(time * 2 + b.offset) * 0.2;
+                if (b.group.position.y < targetY && b.velY <= 0) { b.group.position.y = targetY; b.velY = 0; }
+            });
+
+            npcsData.forEach(npc => { if (npc.swayTimer > 0) { npc.swayTimer -= delta; npc.group.rotation.z = Math.sin(npc.swayTimer * 10) * 0.05; } else npc.group.rotation.z = 0; });
+
+            const activeCam = isThirdPerson ? camera3rd : camera;
+            for (const npcIndex in window.activeBubbles) {
+                const b = window.activeBubbles[npcIndex];
+                if (!b.element.parentElement) { delete window.activeBubbles[npcIndex]; continue; }
+                b.timer -= delta; if (b.timer <= 0) { b.element.remove(); delete window.activeBubbles[npcIndex]; continue; }
+
+                const headPos = new THREE.Vector3(0, 3.2, 0); headPos.applyMatrix4(b.npcGroup.matrixWorld); headPos.project(activeCam);
+                if (headPos.z > 1) { b.element.style.display = 'none'; continue; }
+                b.element.style.display = 'block'; const x = (headPos.x * .5 + .5) * window.innerWidth; const y = (-(headPos.y * .5) + .5) * window.innerHeight;
+                b.element.style.left = `${x}px`; b.element.style.top = `${y - 15}px`;
+            }
+
+            renderer.render(scene, activeCam);
+        }
+
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); camera3rd.aspect = window.innerWidth / window.innerHeight; camera3rd.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        animate();
+    </script>
+</body>
+
+</html>
